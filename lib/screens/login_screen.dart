@@ -8,20 +8,33 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  bool showModal = false;
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
+  AnimationController? controller;
   @override
   void initState() {
     super.initState();
+
+    controller = BottomSheet.createAnimationController(this);
+    controller!.duration = const Duration(milliseconds: 1000);
+    controller!.reverseDuration = const Duration(milliseconds: 700);
+
     Future.delayed(Duration.zero, () {
       _showModalBottomSheet();
     });
+  }
+
+  @override
+  void dispose() {
+    controller!.dispose(); // Liberar recursos del AnimationController
+    super.dispose();
   }
 
   Future<dynamic> _showModalBottomSheet() {
     return showModalBottomSheet(
         context: context,
         isScrollControlled: true,
+        transitionAnimationController: controller,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(42), topRight: Radius.circular(42))),
@@ -42,7 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
               alignment: Alignment.bottomCenter,
               child: GestureDetector(
-                  onTap: () => _showModalBottomSheet(),
+                  onTap: () {
+                    Future.delayed(Duration.zero, () {
+                      _showModalBottomSheet();
+                    });
+                  },
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       decoration: const BoxDecoration(
